@@ -12,4 +12,5 @@ func Router(app *fiber.App) {
 	//app.Get("/carteiras/users/:id/", portfolioHandler.Get)
 	app.Post("/carteiras", portfolioHandler.Create)
 	app.Post("/assets", assetsHandler.Create)
+	app.Get("/assets/carteiras/:id", assetsHandler.Get)
 }
