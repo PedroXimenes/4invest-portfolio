@@ -17,14 +17,14 @@ func Create(c *fiber.Ctx) error {
 		log.Error(err)
 		return c.Status(http.StatusInternalServerError).SendString("Could not decode request body")
 	}
-	fmt.Println(assets)
+
 	// key, err := portfolio.ValidateInput()
 	// if err != nil {
 	// 	errMsg := fmt.Sprintf("Missing key: %s", key)
 	// 	return c.Status(http.StatusBadRequest).SendString(errMsg)
 	// }
 
-	err := models.Insert(assets)
+	errorAssets, err := models.Insert(assets)
 	if err != nil {
 		log.Error(err)
 		if err.Error() == `pq: duplicate key value violates unique constraint "unique_name"` {
@@ -33,6 +33,16 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString("Internal Server Error")
 	}
 
-	message := fmt.Sprintf("Succesfully inserted %d rows.", len(assets))
-	return c.Status(http.StatusCreated).SendString(message)
+	if len(errorAssets) == 0 {
+		message := fmt.Sprintf("Succesfully inserted %d rows.", len(assets))
+		return c.Status(http.StatusCreated).SendString(message)
+	} else {
+		rowsInserted := len(assets) - len(errorAssets)
+		if rowsInserted == 0 {
+			message := fmt.Sprint("0 ativos adicionados")
+			return c.Status(http.StatusConflict).SendString(message)
+		}
+		message := fmt.Sprintf("Succesfully inserted %d rows.\nOs seguintes ativos já existem e não foram adicionados: %v", rowsInserted, errorAssets)
+		return c.Status(http.StatusAccepted).SendString(message)
+	}
 }
