@@ -1,15 +1,12 @@
 package portfolio
 
 import (
-	"fmt"
-
 	"github.com/PedroXimenes/4invest/internal/pkg/db"
 )
 
 func Insert(portfolio *Portfolio) (id int64, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
-		fmt.Printf("DB Connection error: %s\n", err)
 		return
 	}
 	defer conn.Close()

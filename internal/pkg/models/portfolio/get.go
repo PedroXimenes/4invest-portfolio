@@ -1,14 +1,29 @@
 package portfolio
 
-// func Get(id int64) (portfolio Portfolio, err error) {
-// 	conn, err := db.OpenConnection()
-// 	if err != nil {
-// 		return
-// 	}
-// 	defer conn.Close()
+import (
+	"github.com/PedroXimenes/4invest/internal/pkg/db"
+)
 
-// 	row := conn.QueryRow(`SELECT id, email, name, age, nationality, created_at, updated_at FROM users WHERE id=$1`, id)
+func Get(id int64) (portfolios []Portfolio, err error) {
+	conn, err := db.OpenConnection()
+	if err != nil {
+		return
+	}
+	defer conn.Close()
 
-// 	err = row.Scan(&user.ID, &user.Email, &user.Name, &user.Age, &user.Nationality, &user.CreatedAt, &user.UpdatedAt)
-// 	return
-// }
+	rows, err := conn.Query(`SELECT portfolio_id, user_id, name FROM portfolio WHERE user_id=$1`, id)
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		var portfolio Portfolio
+		err = rows.Scan(&portfolio.ID, &portfolio.UserID, &portfolio.Name)
+		if err != nil {
+			continue
+		}
+		portfolios = append(portfolios, portfolio)
+	}
+
+	return
+}
